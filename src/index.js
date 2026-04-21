@@ -24,33 +24,53 @@
  */
 
 // ============================================================
+// DOM HELPERS
+// ============================================================
+
+/**
+ * Returns an element by id or throws a descriptive error if not found.
+ * @param {string} id - The id of the element to find.
+ * @returns {HTMLElement} The found element.
+ * @throws {Error} If the element is not found.
+ */
+const requireById = (id) => {
+  const el = document.getElementById(id);
+  if (!el) throw new Error(`Missing required element with id="${id}"`);
+  return el;
+};
+
+// ============================================================
 // SELECTORS
 // ============================================================
 
 /** @type {FormElements} */
 const elements = {
-  form: document.querySelector("form"),
+  form:
+    document.querySelector("form") ??
+    (() => {
+      throw new Error("Missing form element");
+    })(),
 
   inputs: {
-    firstName: document.getElementById("firstName"),
-    lastName: document.getElementById("lastName"),
-    email: document.getElementById("email"),
+    firstName: requireById("firstName"),
+    lastName: requireById("lastName"),
+    email: requireById("email"),
     queryType: document.querySelectorAll('input[name="queryType"]'),
-    message: document.getElementById("message"),
-    consent: document.getElementById("consent"),
+    message: requireById("message"),
+    consent: requireById("consent"),
   },
 
   errors: {
-    firstName: document.getElementById("firstName-error"),
-    lastName: document.getElementById("lastName-error"),
-    email: document.getElementById("email-error"),
-    queryType: document.getElementById("queryType-error"),
-    message: document.getElementById("message-error"),
-    consent: document.getElementById("consent-error"),
+    firstName: requireById("firstName-error"),
+    lastName: requireById("lastName-error"),
+    email: requireById("email-error"),
+    queryType: requireById("queryType-error"),
+    message: requireById("message-error"),
+    consent: requireById("consent-error"),
   },
 
-  submitButton: document.getElementById("submit-button"),
-  successPopup: document.getElementById("success-popup"),
+  submitButton: requireById("submit-button"),
+  successPopup: requireById("success-popup"),
 };
 
 // ============================================================
@@ -194,19 +214,25 @@ const validateField = (input, errorElement, validatorFn) => {
 
 /**
  * Validates a custom element (radio group or checkbox).
- * @param {HTMLInputElement|NodeListOf<HTMLInputElement>} input - The input to validate.
+ * @param {HTMLElement} representativeInput - The representative input for aria-invalid.
+ * @param {HTMLElement|NodeListOf<HTMLInputElement>} validationInput - The input(s) to validate.
  * @param {HTMLElement} errorElement - The error span for this input.
  * @param {Function} validatorFn - The validation function to use.
  * @returns {boolean} True if valid, false otherwise.
  */
-const validateCustomField = (input, errorElement, validatorFn) => {
-  if (!validatorFn(input)) {
-    showCustomError(input, errorElement);
+function validateCustomField(
+  representativeInput,
+  validationInput,
+  errorElement,
+  validatorFn,
+) {
+  if (!validatorFn(validationInput)) {
+    showCustomError(representativeInput, errorElement);
     return false;
   }
-  hideCustomError(input, errorElement);
+  hideCustomError(representativeInput, errorElement);
   return true;
-};
+}
 
 // ============================================================
 // FORM VALIDATION HANDLER
@@ -236,10 +262,13 @@ function validateForm() {
     ),
     validateCustomField(
       elements.inputs.queryType[0],
+      elements.inputs.queryType,
       elements.errors.queryType,
       validateQueryType,
     ),
+
     validateCustomField(
+      elements.inputs.consent,
       elements.inputs.consent,
       elements.errors.consent,
       validateConsent,
