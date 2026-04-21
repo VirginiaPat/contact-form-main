@@ -146,8 +146,10 @@ function hideCustomError(errorElement) {
  */
 function showSuccessPopup() {
   elements.successPopup.classList.remove("hidden");
+  elements.successPopup.focus(); // focus for screen readers
   setTimeout(() => {
     elements.successPopup.classList.add("hidden");
+    elements.submitButton.focus(); //return fucus to button
   }, 1500);
 }
 
