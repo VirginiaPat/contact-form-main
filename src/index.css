@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+@theme {
+  --color-grey-900: #2a4144;
+  --color-grey-500: #86a2a5;
+  --color-green-600: #0c7d69;
+  --color-green-200: #e0f1e8;
+  --color-red-errors: #d73c3c;
+  --color-green-900: #063e34;
+  --font-karla: "Karla", sans-serif;
+
+  /* custom breakpoin:814px */
+  --breakpoint-lg: 50.875rem;
+}
+
+/* Typography */
+
+.heading {
+  @apply font-karla font-bold text-[2rem] leading-[100%] tracking-[-1px];
+}
+
+.body-md-bold {
+  @apply font-karla font-bold text-lg leading-[150%] tracking-normal;
+}
+
+.body-md-regular {
+  @apply font-karla font-normal text-lg leading-[150%] tracking-normal;
+}
+
+.body-sm-regular {
+  @apply font-karla font-normal text-base leading-[150%] tracking-normal;
+}
