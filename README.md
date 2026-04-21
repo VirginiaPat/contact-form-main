@@ -36,8 +36,8 @@ Users should be able to:
 
 ### Links
 
-- Solution URL: [Github]()
-- Live Site URL: [Netlify]()
+- Solution URL: [Github](https://github.com/VirginiaPat/contact-form-main.git)
+- Live Site URL: [Netlify](https://contact-form-virgi.netlify.app/)
 
 ## My process
 
