@@ -80,7 +80,6 @@
                 id="firstName"
                 autocomplete="given-name"
                 required
-                aria-required="true"
                 aria-describedby="firstName-error"
                 class="body-md-regular outline-1 outline-grey-500 rounded-lg py-3 px-6 hover:outline-green-600 focus:outline-green-600 focus:outline-2 active:outline-green-600"
               />
@@ -106,7 +105,6 @@
                 id="lastName"
                 autocomplete="family-name"
                 required
-                aria-required="true"
                 aria-describedby="lastName-error"
                 class="body-md-regular outline-1 outline-grey-500 rounded-lg py-3 px-6 hover:outline-green-600 focus:outline-green-600 focus:outline-2 active:outline-green-600"
               />
@@ -134,7 +132,6 @@
               id="email"
               autocomplete="email"
               required
-              aria-required="true"
               aria-describedby="email-error"
               class="body-md-regular outline-1 outline-grey-500 rounded-lg py-3 px-6 hover:outline-green-600 focus:outline-2 focus:outline-green-600 active:outline-green-600"
             />
@@ -233,7 +230,6 @@
               name="message"
               id="message"
               required
-              aria-required="true"
               aria-describedby="message-error"
               class="resize-none body-md-regular outline-1 outline-grey-500 rounded-lg py-3 px-6 hover:outline-green-600 focus:outline-2 focus:outline-green-600 active:outline-green-600 h-60 md:h-33 lg:h-26.25"
             ></textarea>
@@ -250,15 +246,11 @@
 
         <!-- B. CONSENT CHECKBOX CONTAINER -->
         <div class="flex flex-col gap-2 mb-10">
-          <label
-            for="consent"
-            class="group cursor-pointer flex items-center gap-4"
-          >
+          <label class="group cursor-pointer flex items-center gap-4">
             <input
               type="checkbox"
               id="consent"
               required
-              aria-required="true"
               aria-describedby="consent-error"
               class="sr-only peer"
             />
