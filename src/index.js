@@ -62,37 +62,37 @@ const elements = {
  * @param {HTMLInputElement} input - The input element to validate.
  * @returns {boolean} True if the field is not empty, false otherwise.
  */
-function validateRequired(input) {
+const validateRequired = (input) => {
   return input.value.trim().length > 0;
-}
+};
 
 /**
  * Validates the email input field.
  * @param {HTMLInputElement} input - The email input element to validate.
  * @returns {boolean} True if the email format is valid, false otherwise.
  */
-function validateEmail(input) {
+const validateEmail = (input) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(input.value.trim());
-}
+};
 
 /**
  * Validates that at least one query type radio button is selected.
  * @param {NodeListOf<HTMLInputElement>} inputs - The radio button elements.
  * @returns {boolean} True if one is selected, false otherwise.
  */
-function validateQueryType(inputs) {
+const validateQueryType = (inputs) => {
   return [...inputs].some((input) => input.checked);
-}
+};
 
 /**
  * Validates the consent checkbox.
  * @param {HTMLInputElement} input - The checkbox element to validate.
  * @returns {boolean} True if the checkbox is checked, false otherwise.
  */
-function validateConsent(input) {
+const validateConsent = (input) => {
   return input.checked;
-}
+};
 
 // ============================================================
 // UI FUNCTIONS
@@ -104,11 +104,12 @@ function validateConsent(input) {
  * @param {HTMLElement} errorElement - The error span to display.
  * @returns {void}
  */
-function showError(input, errorElement) {
+const showError = (input, errorElement) => {
   input.classList.add("outline-red-errors");
   input.classList.remove("outline-grey-500");
+  input.setAttribute("aria-invalid", "true");
   errorElement.classList.remove("hidden");
-}
+};
 
 /**
  * Hides the error message for a given input field.
@@ -116,42 +117,58 @@ function showError(input, errorElement) {
  * @param {HTMLElement} errorElement - The error span to hide.
  * @returns {void}
  */
-function hideError(input, errorElement) {
+const hideError = (input, errorElement) => {
   input.classList.remove("outline-red-errors");
   input.classList.add("outline-grey-500");
+  input.removeAttribute("aria-invalid");
   errorElement.classList.add("hidden");
-}
+};
 
 /**
  * Shows an error message for a custom element (radio group or checkbox).
  * @param {HTMLElement} errorElement - The error span to display.
  * @returns {void}
  */
-function showCustomError(errorElement) {
+const showCustomError = (errorElement) => {
   errorElement.classList.remove("hidden");
-}
+};
 
 /**
  * Hides the error message for a custom element (radio group or checkbox).
  * @param {HTMLElement} errorElement - The error span to hide.
  * @returns {void}
  */
-function hideCustomError(errorElement) {
+const hideCustomError = (errorElement) => {
   errorElement.classList.add("hidden");
-}
+};
+
+/** @type {HTMLElement|null} Stores the element that triggered the popup */
+let lastFocused = null;
 
 /**
- * Shows the success popup and hides it after 5 seconds.
+ * Shows the success popup and moves focus into it.
+ * Saves the previously focused element to restore later.
  * @returns {void}
  */
-function showSuccessPopup() {
+const showSuccessPopup = () => {
+  lastFocused = document.activeElement;
   elements.successPopup.classList.remove("hidden");
-  elements.successPopup.focus(); // focus for screen readers
-  setTimeout(() => {
-    elements.successPopup.classList.add("hidden");
-    elements.submitButton.focus(); //return fucus to button
-  }, 1500);
-}
+  elements.successPopup.setAttribute("aria-hidden", "false");
+  setTimeout(() => elements.successPopup.focus(), 50);
+  setTimeout(() => hideSuccessPopup(), 2000);
+};
+
+/**
+ * Hides the success popup and returns focus to the triggering element.
+ * @returns {void}
+ */
+const hideSuccessPopup = () => {
+  elements.successPopup.classList.add("hidden");
+  elements.successPopup.setAttribute("aria-hidden", "true");
+  if (lastFocused && typeof lastFocused.focus === "function") {
+    lastFocused.focus();
+  }
+};
 
 // ============================================================
 // FIELD VALIDATORS
@@ -164,14 +181,14 @@ function showSuccessPopup() {
  * @param {Function} validatorFn - The validation function to use.
  * @returns {boolean} True if valid, false otherwise.
  */
-function validateField(input, errorElement, validatorFn) {
+const validateField = (input, errorElement, validatorFn) => {
   if (!validatorFn(input)) {
     showError(input, errorElement);
     return false;
   }
   hideError(input, errorElement);
   return true;
-}
+};
 
 /**
  * Validates a custom element (radio group or checkbox).
@@ -180,14 +197,14 @@ function validateField(input, errorElement, validatorFn) {
  * @param {Function} validatorFn - The validation function to use.
  * @returns {boolean} True if valid, false otherwise.
  */
-function validateCustomField(input, errorElement, validatorFn) {
+const validateCustomField = (input, errorElement, validatorFn) => {
   if (!validatorFn(input)) {
     showCustomError(errorElement);
     return false;
   }
   hideCustomError(errorElement);
   return true;
-}
+};
 
 // ============================================================
 // FORM VALIDATION HANDLER
@@ -195,7 +212,7 @@ function validateCustomField(input, errorElement, validatorFn) {
 
 /**
  * Validates all form fields and shows/hides errors accordingly.
- * @returns {boolean} True if all fields are valid, false otherwise.
+ * @returns {{ isValid: boolean, firstInvalid: HTMLElement|null }}
  */
 function validateForm() {
   const results = [
@@ -227,7 +244,23 @@ function validateForm() {
     ),
   ];
 
-  return results.every(Boolean);
+  const isValid = results.every(Boolean);
+
+  // Find first invalid input to focus
+  const allInputs = [
+    elements.inputs.firstName,
+    elements.inputs.lastName,
+    elements.inputs.email,
+    elements.inputs.message,
+    elements.inputs.queryType[0],
+    elements.inputs.consent,
+  ];
+
+  const firstInvalid =
+    allInputs.find((input) => input.getAttribute("aria-invalid") === "true") ??
+    null;
+
+  return { isValid, firstInvalid };
 }
 
 // ============================================================
@@ -236,18 +269,23 @@ function validateForm() {
 
 /**
  * Handles the form submission event.
- * Validates the form and shows the success popup if valid.
+ * Validates the form, focuses first invalid field, or shows success popup.
  * @param {SubmitEvent} e - The submit event.
  * @returns {void}
  */
-function handleSubmit(e) {
+const handleSubmit = (e) => {
   e.preventDefault();
 
-  if (validateForm()) {
-    showSuccessPopup();
-    elements.form.reset();
+  const { isValid, firstInvalid } = validateForm();
+
+  if (!isValid) {
+    firstInvalid?.focus(); // focus first invalid field
+    return;
   }
-}
+
+  showSuccessPopup();
+  elements.form.reset();
+};
 
 // ============================================================
 // EVENT LISTENERS
@@ -291,4 +329,19 @@ elements.inputs.message.addEventListener("blur", () => {
     elements.errors.message,
     validateRequired,
   );
+});
+
+document.addEventListener("keydown", (e) => {
+  if (
+    e.key === "Escape" &&
+    elements.successPopup.getAttribute("aria-hidden") === "false"
+  ) {
+    hideSuccessPopup();
+  }
+});
+
+document.addEventListener("click", (e) => {
+  if (elements.successPopup.getAttribute("aria-hidden") === "false") {
+    hideSuccessPopup();
+  }
 });
