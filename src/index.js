@@ -153,7 +153,7 @@ let lastFocused = null;
 const showSuccessPopup = () => {
   lastFocused = document.activeElement;
   elements.successPopup.classList.remove("hidden");
-  elements.successPopup.setAttribute("aria-hidden", "false");
+  elements.successPopup.removeAttribute("aria-hidden");
   setTimeout(() => elements.successPopup.focus(), 50);
   setTimeout(() => hideSuccessPopup(), 2000);
 };
