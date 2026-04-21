@@ -129,7 +129,8 @@ const hideError = (input, errorElement) => {
  * @param {HTMLElement} errorElement - The error span to display.
  * @returns {void}
  */
-const showCustomError = (errorElement) => {
+const showCustomError = (input, errorElement) => {
+  input.setAttribute("aria-invalid", "true");
   errorElement.classList.remove("hidden");
 };
 
@@ -138,7 +139,8 @@ const showCustomError = (errorElement) => {
  * @param {HTMLElement} errorElement - The error span to hide.
  * @returns {void}
  */
-const hideCustomError = (errorElement) => {
+const hideCustomError = (input, errorElement) => {
+  input.removeAttribute("aria-invalid");
   errorElement.classList.add("hidden");
 };
 
@@ -153,7 +155,7 @@ let lastFocused = null;
 const showSuccessPopup = () => {
   lastFocused = document.activeElement;
   elements.successPopup.classList.remove("hidden");
-  elements.successPopup.removeAttribute("aria-hidden");
+  elements.successPopup.setAttribute("aria-hidden", "false");
   setTimeout(() => elements.successPopup.focus(), 50);
   setTimeout(() => hideSuccessPopup(), 2000);
 };
@@ -199,10 +201,10 @@ const validateField = (input, errorElement, validatorFn) => {
  */
 const validateCustomField = (input, errorElement, validatorFn) => {
   if (!validatorFn(input)) {
-    showCustomError(errorElement);
+    showCustomError(input, errorElement);
     return false;
   }
-  hideCustomError(errorElement);
+  hideCustomError(input, errorElement);
   return true;
 };
 
@@ -233,7 +235,7 @@ function validateForm() {
       validateRequired,
     ),
     validateCustomField(
-      elements.inputs.queryType,
+      elements.inputs.queryType[0],
       elements.errors.queryType,
       validateQueryType,
     ),
@@ -246,7 +248,6 @@ function validateForm() {
 
   const isValid = results.every(Boolean);
 
-  // Find first invalid input to focus
   const allInputs = [
     elements.inputs.firstName,
     elements.inputs.lastName,
@@ -340,7 +341,7 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-document.addEventListener("click", (e) => {
+document.addEventListener("click", () => {
   if (elements.successPopup.getAttribute("aria-hidden") === "false") {
     hideSuccessPopup();
   }
